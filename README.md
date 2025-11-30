@@ -1,4 +1,4 @@
-# 🌤️ Weather API Explorer – A Beginner's Toolkit
+# 🌤️ Weather API Explorer
 
 A beautiful, beginner-friendly web application that demonstrates API integration, error handling, and creative UI/UX design. Built with React, TypeScript, and the OpenWeather API.
 
