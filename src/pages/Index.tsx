@@ -2,13 +2,21 @@ import { useState } from "react";
 import { WeatherCard } from "@/components/WeatherCard";
 import { SearchBar } from "@/components/SearchBar";
 import { JokeCard } from "@/components/JokeCard";
-import { Instructions } from "@/components/Instructions";
 import { Cloud, CloudRain, Sun } from "lucide-react";
 
+/**
+ * Main Index page component for the Weather Explorer app
+ * Displays weather data with animated background elements
+ */
 const Index = () => {
+  // State for tracking the current city and search triggers
   const [city, setCity] = useState("");
   const [searchTrigger, setSearchTrigger] = useState(0);
 
+  /**
+   * Handle city search submission
+   * @param cityName - Name of the city to search for
+   */
   const handleSearch = (cityName: string) => {
     setCity(cityName);
     setSearchTrigger(prev => prev + 1);
@@ -35,16 +43,16 @@ const Index = () => {
         </header>
 
         <div className="max-w-4xl mx-auto space-y-8">
+          {/* Search bar for entering city name */}
           <SearchBar onSearch={handleSearch} />
           
+          {/* Display weather and joke cards when a city is searched */}
           {city && (
             <div className="grid md:grid-cols-2 gap-6 animate-slide-up">
               <WeatherCard city={city} searchTrigger={searchTrigger} />
               <JokeCard />
             </div>
           )}
-
-          <Instructions />
         </div>
       </div>
 
