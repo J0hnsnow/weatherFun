@@ -1,4 +1,13 @@
-# Logs
+node_modules/
+.env
+dist/
+/.turbo
+/.vercel
+coverage/
+*.local
+*.log
+/.idea
+/.DS_Store# Logs
 logs
 *.log
 npm-debug.log*

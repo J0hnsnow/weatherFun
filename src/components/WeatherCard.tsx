@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Cloud, CloudRain, CloudSnow, Sun, Wind, Shirt } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { apikey } from "@/env";
 
 /**
  * Props for the WeatherCard component
@@ -106,28 +107,33 @@ export const WeatherCard = ({ city, searchTrigger }: WeatherCardProps) => {
    */
   useEffect(() => {
     const fetchWeather = async () => {
-      // Check for API key in environment variables
-      const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-      
-      if (!apiKey) {
-        setError("⚠️ API Key Missing: Please add your OpenWeather API key to continue. See instructions below for setup.");
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       setError(null);
       setWeather(null);
 
       try {
-        // Fetch weather data from OpenWeather API
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`
-        );
+        // If a client-side API key is provided in `src/env.ts` and we're in dev,
+        // optionally use it (useful for local/dev only). Otherwise call the
+        // serverless proxy which keeps the API key private in production.
+        const useClientKey = Boolean(apikey) && import.meta.env.DEV;
 
-        // Handle 401 Unauthorized error (invalid API key)
+        let response: Response;
+
+        if (useClientKey) {
+          // WARNING: Using a client-side key embeds it in the bundle and is public.
+          // Only use this for local development and testing.
+          console.warn('Using client-side OpenWeather API key (client-visible).');
+          response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apikey}&units=metric`
+          );
+        } else {
+          // Call serverless proxy on the same origin; server keeps the API key private
+          response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+        }
+
+        // Handle 401 Unauthorized error (server-side key invalid)
         if (response.status === 401) {
-          setError("🔐 Unauthorized: Your API key is invalid. Please check your VITE_OPENWEATHER_API_KEY in the environment variables.");
+          setError("🔐 Unauthorized: The server's API key was rejected. Please contact the administrator.");
           return;
         }
 
@@ -139,7 +145,8 @@ export const WeatherCard = ({ city, searchTrigger }: WeatherCardProps) => {
 
         // Handle other HTTP errors
         if (!response.ok) {
-          throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+          const text = await response.text();
+          throw new Error(`API Error: ${response.status} - ${text}`);
         }
 
         // Parse the API response

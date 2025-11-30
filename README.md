@@ -398,6 +398,76 @@ npm run dev
 
 ### Documentation
 - [OpenWeather API Docs](https://openweathermap.org/api) - Weather API reference
+
+---
+
+## ⬆️ Deploying to Vercel
+
+This project includes a Vercel configuration and a serverless proxy for the OpenWeather API.
+
+### What I added
+- `vercel.json` — instructs Vercel how to build the Vite app and exposes `api/` serverless functions.
+- `api/weather.ts` — a serverless function that proxies requests to OpenWeather using a server-side `OPENWEATHER_API_KEY` (keep this secret).
+
+### How to set up and deploy
+
+1. Create an account at https://vercel.com and install the Vercel CLI (optional):
+```bash
+npm i -g vercel
+```
+
+2. Set your server-only environment variable in the Vercel dashboard:
+   - Key: `OPENWEATHER_API_KEY`
+   - Value: your OpenWeather API key
+
+3. (Optional) For local development with `vercel dev`, create a local `.env` file with:
+```env
+# Local server-only key for the proxy function
+OPENWEATHER_API_KEY=your_server_only_key_here
+
+# (Optional) client-visible key for local testing only
+VITE_OPENWEATHER_API_KEY=your_client_visible_key_here
+```
+
+4. Deploy to Vercel:
+```bash
+# from the project root
+vercel deploy --prod
+```
+
+5. The serverless endpoint will be available at `https://<your-deployment>/api/weather?city=London`.
+
+### Security Notes
+- Do NOT set `VITE_OPENWEATHER_API_KEY` in production — any `VITE_` prefixed var is embedded in the client bundle and is publicly visible.
+- Store the private key as `OPENWEATHER_API_KEY` in your Vercel project settings (Environment Variables) so it is only available to serverless functions.
+- Rotate your OpenWeather API key if it was previously embedded in a public repo or client bundle.
+
+If you'd like, I can also add a small GitHub Actions workflow to automatically deploy on push to `main`.
+
+---
+
+## 🛠️ Auto-deploy with GitHub Actions
+
+You can automatically deploy this project to Vercel on every push to `main` using the included GitHub Actions workflow: `.github/workflows/deploy.yml`.
+
+What the workflow does:
+- Checks out the repository
+- Installs dependencies (`npm ci`)
+- Builds the app (`npm run build`)
+- Calls the Vercel Action to deploy the build as a production deployment
+
+Required GitHub repository secrets (set these in `Settings → Secrets and variables → Actions`):
+- `VERCEL_TOKEN` — a Vercel personal token (create in Vercel account settings)
+- `VERCEL_ORG_ID` — your Vercel organization ID (found in Vercel project settings)
+- `VERCEL_PROJECT_ID` — your Vercel project ID (found in Vercel project settings)
+
+How to get the values:
+1. Sign in to Vercel and open your project dashboard.
+2. Go to **Settings → General → Git Integration** to connect the repository if you prefer Vercel's Git integration instead (alternatively use the token-based workflow below).
+3. To create a token, go to **Account Settings → Tokens → Create Token** and store it as `VERCEL_TOKEN` in GitHub.
+4. In your Vercel project settings you'll find `Organization ID` and `Project ID` — add both as repository secrets.
+
+Note: If you prefer, you can also use Vercel's native Git integration (recommended) which will automatically deploy on push without adding this workflow. The GitHub Actions workflow is useful when you want more build control or additional CI steps before deployment.
 - [React Documentation](https://react.dev) - React fundamentals
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript guide
 - [Vite Guide](https://vitejs.dev/guide/) - Vite setup & config
