@@ -1,15 +1,26 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
+/**
+ * Props for SearchBar component
+ */
 interface SearchBarProps {
   onSearch: (city: string) => void;
 }
 
+/**
+ * SearchBar component for entering city names
+ * Submits search query to parent component
+ */
 export const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [inputValue, setInputValue] = useState("");
 
+  /**
+   * Handle form submission
+   * @param e - Form event
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
